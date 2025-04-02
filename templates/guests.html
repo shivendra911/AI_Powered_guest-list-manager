@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Guest List{% endblock %}
+
+{% block content %}
+<h2>Guest List</h2>
+<a href="{{ url_for('dashboard') }}" class="btn btn-secondary mb-3">Back to Dashboard</a>
+
+<form method="POST" action="{{ url_for('add_guest') }}">
+    <div class="row g-3">
+        <div class="col-md-4">
+            <input type="text" name="name" class="form-control" placeholder="Name" required>
+        </div>
+        <div class="col-md-4">
+            <input type="email" name="email" class="form-control" placeholder="Email" required>
+        </div>
+        <div class="col-md-4">
+            <button type="submit" class="btn btn-primary">Add Guest</button>
+        </div>
+    </div>
+</form>
+
+<table class="table mt-3">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for guest in guests %}
+        <tr>
+            <td>{{ guest.name }}</td>
+            <td>{{ guest.email }}</td>
+            <td>
+                <a href="{{ url_for('delete_guest', id=guest.id) }}" 
+                   class="btn btn-danger btn-sm"
+                   onclick="return confirm('Are you sure?')">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
