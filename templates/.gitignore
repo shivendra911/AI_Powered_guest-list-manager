@@ -1,0 +1,15 @@
+# .gitignore
+venv/
+instance/
+uploads/
+*.pyc
+__pycache__/
+.env
+*.log
+.DS_Store
+.env.local
+*.sqlite
+*.xlsx
+*.csv
+*.vscode/
+.idea/
