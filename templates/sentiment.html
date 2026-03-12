@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block page_title %}Sentiment Analysis{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h2 class="text-2xl font-bold text-gray-800">Guest Feedback Sentiment Analysis</h2>
+    <p class="text-gray-600 mt-2">Analyze the sentiment of guest feedback, comments, or messages to understand event satisfaction.</p>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2">
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-medium text-gray-800 mb-4">Text Analysis</h3>
+            
+            <div class="mb-4">
+                <label for="feedback-text" class="block text-sm font-medium text-gray-700 mb-2">Enter feedback text:</label>
+                <textarea id="feedback-text" rows="6" class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Paste guest feedback or comments here..."></textarea>
+            </div>
+            
+            <div class="flex justify-between">
+                <button id="clear-button" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded">
+                    Clear
+                </button>
+                <button id="analyze-button" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded">
+                    <i class="fas fa-chart-line mr-2"></i>Analyze Sentiment
+                </button>
+            </div>
+        </div>
+        
+        <div id="analysis-results" class="bg-white rounded-lg shadow p-6 mt-6 hidden">
+            <h3 class="text-lg font-medium text-gray-800 mb-4">Analysis Results</h3>
+            
+            <div class="mb-6">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-gray-700">Sentiment Score:</span>
+                    <span id="sentiment-score" class="text-lg font-bold">0</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                    <div id="sentiment-bar" class="bg-blue-600 h-2.5 rounded-full" style="width: 50%"></div>
+                </div>
+                <div class="flex justify-between text-xs text-gray-500 mt-1">
+                    <span>Negative (-10)</span>
+                    <span>Neutral (0)</span>
+                    <span>Positive (+10)</span>
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <h4 class="text-sm font-medium text-gray-700 mb-2">Overall Sentiment:</h4>
+                <p id="sentiment-category" class="text-lg font-medium p-3 rounded-md bg-gray-100"></p>
+            </div>
+            
+            <div class="mb-4">
+                <h4 class="text-sm font-medium text-gray-700 mb-2">Explanation:</h4>
+                <p id="sentiment-explanation" class="text-gray-800"></p>
+            </div>
+            
+            <div>
+                <h4 class="text-sm font-medium text-gray-700 mb-2">Key Points:</h4>
+                <ul id="key-points" class="list-disc pl-5 text-gray-800"></ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="lg:col-span-1">
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-medium text-gray-800 mb-4">Sample Prompts</h3>
+            
+            <div class="space-y-2">
+                <div class="p-2 bg-gray-100 rounded-md text-sm cursor-pointer hover:bg-gray-200">
+                    "The venue was beautiful but the catering service was disappointing. Food was cold and servers were slow."
+                </div>
+                <div class="p-2 bg-gray-100 rounded-md text-sm cursor-pointer hover:bg-gray-200">
+                    "Amazing event! The speakers were inspirational and the networking opportunities were valuable."
+                </div>
+                <div class="p-2 bg-gray-100 rounded-md text-sm cursor-pointer hover:bg-gray-200">
+                    "The event was okay. Nothing special but nothing terrible either. Might attend again next year."
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const analyzeButton = document.getElementById('analyze-button');
+    const clearButton = document.getElementById('clear-button');
+    const feedbackText = document.getElementById('feedback-text');
+    const resultsDiv = document.getElementById('analysis-results');
+    const samplePrompts = document.querySelectorAll('.bg-gray-100.rounded-md.text-sm');
+    
+    // Handle sample prompt clicks
+    samplePrompts.forEach(prompt => {
+        prompt.addEventListener('click', function() {
+            feedbackText.value = this.textContent.trim();
+        });
+    });
+    
+    // Clear text
+    clearButton.addEventListener('click', function() {
+        feedbackText.value = '';
+        resultsDiv.classList.add('hidden');
+    });
+    
+    // Analyze sentiment
+    analyzeButton.addEventListener('click', function() {
+        const text = feedbackText.value.trim();
+        
+        if (!text) {
+            alert('Please enter some text to analyze.');
+            return;
+        }
+        
+        // Show loading state
+        analyzeButton.disabled = true;
+        analyzeButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Analyzing...';
+        
+        // Send to backend
+        fetch('/analyze-sentiment', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ text: text }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            try {
+                // Parse the response
+                const analysis = JSON.parse(data.analysis);
+                
+                // Update the UI with results
+                document.getElementById('sentiment-score').textContent = analysis.score;
+                document.getElementById('sentiment-category').textContent = analysis.sentiment;
+                document.getElementById('sentiment-explanation').textContent = analysis.explanation;
+                
+                // Update sentiment bar
+                const normalizedScore = ((analysis.score + 10) / 20) * 100; // Convert -10 to +10 to 0-100%
+                const sentimentBar = document.getElementById('sentiment-bar');
+                sentimentBar.style.width = normalizedScore + '%';
+                
+                // Set color based on sentiment
+                if (analysis.score < -3) {
+                    sentimentBar.classList.remove('bg-blue-600', 'bg-green-600');
+                    sentimentBar.classList.add('bg-red-600');
+                } else if (analysis.score > 3) {
+                    sentimentBar.classList.remove('bg-blue-600', 'bg-red-600');
+                    sentimentBar.classList.add('bg-green-600');
+                } else {
+                    sentimentBar.classList.remove('bg-green-600', 'bg-red-600');
+                    sentimentBar.classList.add('bg-blue-600');
+                }
+                
+                // Update key points
+                const keyPointsList = document.getElementById('key-points');
+                keyPointsList.innerHTML = '';
+                analysis.key_points.forEach(point => {
+                    const li = document.createElement('li');
+                    li.textContent = point;
+                    keyPointsList.appendChild(li);
+                });
+                
+                // Show results
+                resultsDiv.classList.remove('hidden');
+            } catch (error) {
+                console.error('Error parsing analysis:', error);
+                alert('Error analyzing sentiment. Please try again.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error analyzing sentiment. Please try again.');
+        })
+        .finally(() => {
+            // Reset button state
+            analyzeButton.disabled = false;
+            analyzeButton.innerHTML = '<i class="fas fa-chart-line mr-2"></i>Analyze Sentiment';
+        });
+    });
+});
+</script>
+{% endblock %} 

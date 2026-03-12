@@ -1,0 +1,969 @@
+{% extends "base.html" %}
+
+{% block page_title %}Chat Assistant - Guest Manager{% endblock %}
+
+{% block header_title %}Chat Assistant{% endblock %}
+
+{% block content %}
+<div class="page-section max-w-7xl mx-auto flex gap-6 h-[calc(100vh-4rem)]">
+    <!-- Left Column: Chat Container -->
+    <div class="flex-1 flex flex-col bg-gray-50 dark:bg-gray-900 min-w-0">
+        <!-- Chat messages container -->
+        <div id="chat-messages" class="flex-1 overflow-y-auto pb-24">
+            <div class="flex flex-col min-h-full justify-end">
+                <div class="flex flex-col space-y-4 p-4">
+                    <!-- Welcome message -->
+                    <div class="message ai-message">
+                        <div class="flex items-start gap-3">
+                            <div class="flex-shrink-0">
+                                <div class="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white">
+                                    <i class="fas fa-robot"></i>
+                        </div>
+                    </div>
+                            <div class="flex-grow max-w-4xl">
+                                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
+                                    <p class="text-gray-800 dark:text-gray-200">
+                                        Hello! I'm your AI assistant. I can help you with:
+                                    </p>
+                                    <ul class="list-disc ml-6 mt-2 text-gray-700 dark:text-gray-300">
+                                        <li>Managing guest lists</li>
+                                        <li>Creating and organizing events</li>
+                                        <li>Handling RSVPs</li>
+                                        <li>Providing event planning advice</li>
+                                        <li>Answering your questions</li>
+                                    </ul>
+                                    <p class="mt-2 text-gray-800 dark:text-gray-200">
+                                        How can I assist you today?
+                                    </p>
+                        </div>
+                    </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fixed bottom section with input -->
+        <div class="fixed bottom-0 left-0 right-96 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4 z-10">
+            <form id="chat-form" class="flex flex-col gap-2">
+                <!-- File upload area -->
+                <div id="drop-zone" class="hidden border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center mb-2">
+                    <input type="file" id="file-upload" accept=".xlsx,.xls,.csv,.txt,.pdf" class="hidden">
+                    <div class="text-gray-600 dark:text-gray-400">
+                        <i class="fas fa-file-upload text-xl mb-2"></i>
+                        <p>Drag & drop your file here or <button type="button" id="browse-button" class="text-indigo-600 dark:text-indigo-400 hover:underline">browse</button></p>
+                        <p class="text-sm">Supported formats: .xlsx, .xls, .csv, .txt, .pdf</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <div class="flex-1">
+                        <input type="text" 
+                               id="user-input" 
+                               class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                               placeholder="Type your message here...">
+                    </div>
+                    
+                    <!-- Action buttons -->
+                    <div class="flex items-center gap-2">
+                        <!-- File upload toggle -->
+                        <button type="button" 
+                                id="upload-toggle" 
+                                class="flex-shrink-0 px-3 py-2 rounded-lg text-gray-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400 transition-colors"
+                                title="Upload file">
+                            <i class="fas fa-file-upload"></i>
+                        </button>
+                        
+                        <!-- Clear chat button -->
+                        <button type="button" 
+                                id="clear-chat" 
+                                class="flex-shrink-0 px-3 py-2 rounded-lg text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-colors"
+                                title="Clear chat">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        
+                        <!-- New chat button -->
+                        <button type="button" 
+                                id="new-chat" 
+                                class="flex-shrink-0 px-3 py-2 rounded-lg text-gray-500 hover:text-green-600 dark:text-gray-400 dark:hover:text-green-400 transition-colors"
+                                title="Start new chat">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        
+                        <!-- Combined send/stop button -->
+                        <button type="submit" 
+                                id="send-button"
+                                class="flex-shrink-0 bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Typing indicator container -->
+        <div id="typing-container" class="fixed bottom-20 left-0 right-96 px-4"></div>
+            </div>
+
+    <!-- Right Column: Quick Actions -->
+    <div class="w-96 flex-shrink-0">
+        <div class="h-full overflow-y-auto pr-2">
+            {% include 'quick_actions.html' %}
+        </div>
+    </div>
+</div>
+
+<!-- Excel Upload Dialog -->
+<div id="upload-dialog" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <h2 class="text-xl font-bold mb-4 dark:text-white">Upload Guest List</h2>
+        <div class="mb-4">
+            <input type="file" id="excel-file" accept=".xlsx,.xls" class="hidden">
+            <button onclick="document.getElementById('excel-file').click()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                Choose Excel File
+            </button>
+            <span id="file-name" class="ml-2 text-gray-600 dark:text-gray-400"></span>
+        </div>
+        <div id="preview-container" class="mb-4"></div>
+        <div class="flex justify-end space-x-4">
+            <button onclick="closeUploadDialog()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- Search Dialog -->
+<div id="search-dialog" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <h2 class="text-xl font-bold mb-4 dark:text-white">Find Guest</h2>
+        <div class="mb-4">
+            <input type="text" id="search-input" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" 
+                   placeholder="Enter registration number, name, or email">
+            <button onclick="searchGuest()" class="mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                Search
+            </button>
+        </div>
+        <div id="search-results" class="mb-4"></div>
+        <div class="flex justify-end">
+            <button onclick="closeSearchDialog()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">Close</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const chatForm = document.getElementById('chat-form');
+    const userInput = document.getElementById('user-input');
+    const chatMessages = document.getElementById('chat-messages');
+    const typingContainer = document.getElementById('typing-container');
+    const dropZone = document.getElementById('drop-zone');
+    const fileUpload = document.getElementById('file-upload');
+    const uploadToggle = document.getElementById('upload-toggle');
+    const browseButton = document.getElementById('browse-button');
+    let isProcessing = false;
+    let currentSessionId = null;
+
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async function typeText(element, text) {
+        if (!text) return;
+        
+        // Handle HTML content
+        if (text.includes('<')) {
+            element.innerHTML = text;
+            return;
+        }
+
+        const words = text.split(' ');
+        let currentText = '';
+        element.innerHTML = '';
+        
+        for (let i = 0; i < words.length; i++) {
+            const word = words[i];
+            currentText += (i > 0 ? ' ' : '') + word;
+            element.innerHTML = `${currentText}<span class="typing-cursor">|</span>`;
+            await sleep(30);
+        }
+        
+        element.innerHTML = currentText; // Remove cursor after typing
+    }
+
+    function addMessage(type, content) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${type}-message opacity-0 transform translate-y-2`;
+        
+        const icon = type === 'user' ? 'fa-user' : 'fa-robot';
+        const bgColor = type === 'user' ? 'bg-indigo-600' : 'bg-indigo-500';
+        const alignment = type === 'user' ? 'flex-row-reverse' : 'flex-row';
+        
+        messageDiv.innerHTML = `
+            <div class="flex items-start gap-3 ${alignment} mb-4">
+            <div class="flex-shrink-0">
+                    <div class="w-8 h-8 rounded-full ${bgColor} flex items-center justify-center text-white">
+                        <i class="fas ${icon}"></i>
+                    </div>
+                </div>
+                <div class="flex-grow max-w-4xl">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
+                        <div class="message-content text-gray-800 dark:text-gray-200"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        const messagesContainer = chatMessages.querySelector('.flex-col');
+        if (!messagesContainer) return null;
+        
+        messagesContainer.appendChild(messageDiv);
+        
+        // Fade in animation
+        requestAnimationFrame(() => {
+            messageDiv.classList.remove('opacity-0', 'transform', 'translate-y-2');
+            messageDiv.classList.add('transition-all', 'duration-300', 'ease-out');
+        });
+
+        scrollToBottom();
+        
+        const contentContainer = messageDiv.querySelector('.message-content');
+        if (content.includes('<table')) {
+            contentContainer.innerHTML = content;
+        } else {
+            contentContainer.textContent = type === 'user' ? content : '';
+        }
+        return contentContainer;
+    }
+
+    function addThinkingIndicator() {
+        const indicator = document.createElement('div');
+        indicator.id = 'typing-indicator';
+        indicator.className = 'message ai-message opacity-0 transform translate-y-2';
+        
+        indicator.innerHTML = `
+            <div class="flex items-start gap-3 mb-4">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                </div>
+                <div class="flex-grow max-w-4xl">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
+                        <div class="thinking-animation">
+                            <div class="thinking-dots">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        typingContainer.appendChild(indicator);
+        
+        requestAnimationFrame(() => {
+            indicator.classList.remove('opacity-0', 'transform', 'translate-y-2');
+            indicator.classList.add('transition-all', 'duration-300', 'ease-out');
+        });
+    }
+
+    function removeThinkingIndicator() {
+        const indicator = document.getElementById('typing-indicator');
+        if (indicator) {
+            indicator.classList.add('opacity-0', 'transform', 'translate-y-2');
+            setTimeout(() => indicator.remove(), 300);
+        }
+    }
+
+    function scrollToBottom() {
+        const scrollHeight = chatMessages.scrollHeight;
+        const currentScroll = chatMessages.scrollTop;
+        const targetScroll = scrollHeight - chatMessages.clientHeight;
+        
+        if (targetScroll - currentScroll > 100) {
+            // Smooth scroll for larger distances
+            chatMessages.scrollTo({
+                top: targetScroll,
+                behavior: 'smooth'
+            });
+        } else {
+            // Instant scroll for small distances
+            chatMessages.scrollTop = targetScroll;
+        }
+    }
+
+    function formatResponse(content) {
+        if (!content) return 'No response received.';
+        
+        if (content === 'No results found.') {
+            return `<div class="flex items-center justify-center p-4 text-gray-500 dark:text-gray-400">
+                        <i class="fas fa-search mr-2"></i>
+                        No results found
+                    </div>`;
+        }
+        
+        if (content.includes('<table')) {
+            return content
+                .replace(/<div class="overflow-x-auto">/g, '<div class="overflow-x-auto max-w-full">')
+                .replace(/<table/g, '<table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 border dark:border-gray-700 rounded-lg overflow-hidden">')
+                .replace(/<thead>/g, '<thead class="bg-gray-50 dark:bg-gray-800">')
+                .replace(/<th>/g, '<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">')
+                .replace(/<tbody>/g, '<tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-800">')
+                .replace(/<tr>/g, '<tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">')
+                .replace(/<td>/g, '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">');
+        }
+        
+        return content;
+    }
+
+    // File upload handling
+    uploadToggle.addEventListener('click', () => {
+        dropZone.classList.toggle('hidden');
+    });
+
+    browseButton.addEventListener('click', () => {
+        fileUpload.click();
+    });
+
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('border-indigo-500');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('border-indigo-500');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('border-indigo-500');
+        const file = e.dataTransfer.files[0];
+        if (file) handleFileUpload(file);
+    });
+
+    fileUpload.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) handleFileUpload(file);
+    });
+
+    async function handleFileUpload(file) {
+        if (!file.name.match(/\.(xlsx|xls)$/i)) {
+            alert('Please upload an Excel file (.xlsx or .xls)');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            addMessage('user', `Uploading guest list from: ${file.name}`);
+            const response = await fetch('/upload-excel', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            
+            if (result.preview) {
+                const aiResponse = addMessage('ai', '');
+                await typeText(aiResponse, 'Here are the guests found in your Excel file. Would you like me to add them to the database?');
+                
+                const previewMessage = addMessage('ai', result.preview);
+                
+                // Add confirmation buttons
+                const confirmationDiv = document.createElement('div');
+                confirmationDiv.className = 'mt-4 flex gap-2';
+                confirmationDiv.innerHTML = `
+                    <button onclick="confirmGuestImport('${result.session_id}')" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                        Yes, add these guests
+                    </button>
+                    <button onclick="cancelGuestImport()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                        No, cancel
+                    </button>
+                `;
+                previewMessage.appendChild(confirmationDiv);
+            } else {
+                const aiResponse = addMessage('ai', '');
+                await typeText(aiResponse, 'Sorry, I could not process the Excel file. Please make sure it contains the required columns (name and email).');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            const aiResponse = addMessage('ai', '');
+            await typeText(aiResponse, 'Sorry, there was an error processing your file. Please try again.');
+        }
+
+        dropZone.classList.add('hidden');
+        fileUpload.value = '';
+    }
+
+    chatForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        if (isProcessing) {
+            // If already processing, stop the current operation
+            isProcessing = false;
+            const sendButton = document.getElementById('send-button');
+            sendButton.innerHTML = '<i class="fas fa-paper-plane"></i>';
+            return;
+        }
+        
+        const message = userInput.value.trim();
+        if (!message) return;
+        
+        isProcessing = true;
+        userInput.value = '';
+        userInput.disabled = true;
+        const sendButton = document.getElementById('send-button');
+        sendButton.innerHTML = '<i class="fas fa-stop"></i>';
+        
+        const userMessageContainer = addMessage('user', message);
+        addThinkingIndicator();
+
+        try {
+            const response = await fetch('/get-response', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message: message }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            removeThinkingIndicator();
+            
+            if (!data || !data.reply) {
+                throw new Error('No response data received');
+            }
+            
+            const formattedContent = formatResponse(data.reply);
+            const aiMessageContainer = addMessage('ai', formattedContent);
+            
+            if (!formattedContent.includes('<table')) {
+                await typeText(aiMessageContainer, formattedContent);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            removeThinkingIndicator();
+            
+            addMessage('ai', `
+                <div class="flex items-center text-red-500 dark:text-red-400">
+                    <i class="fas fa-exclamation-circle mr-2"></i>
+                    <span>Sorry, I encountered an error. Please try again.</span>
+                </div>
+            `);
+        } finally {
+            isProcessing = false;
+            userInput.disabled = false;
+            userInput.focus();
+            sendButton.innerHTML = '<i class="fas fa-paper-plane"></i>';
+        }
+    });
+
+    userInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            chatForm.dispatchEvent(new Event('submit'));
+            }
+    });
+
+    // Add new event listeners for the new buttons
+    document.getElementById('clear-chat').addEventListener('click', function() {
+        const chatMessages = document.getElementById('chat-messages');
+        const welcomeMessage = chatMessages.querySelector('.message.ai-message');
+        chatMessages.innerHTML = '';
+        if (welcomeMessage) {
+            chatMessages.appendChild(welcomeMessage);
+        }
+    });
+
+    document.getElementById('new-chat').addEventListener('click', function() {
+        const chatMessages = document.getElementById('chat-messages');
+        chatMessages.innerHTML = '';
+        // Add welcome message
+        const welcomeMessage = document.createElement('div');
+        welcomeMessage.className = 'message ai-message';
+        welcomeMessage.innerHTML = `
+            <div class="flex items-start gap-3">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                </div>
+                <div class="flex-grow max-w-4xl">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
+                        <p class="text-gray-800 dark:text-gray-200">
+                            Hello! I'm your AI assistant. I can help you with:
+                        </p>
+                        <ul class="list-disc ml-6 mt-2 text-gray-700 dark:text-gray-300">
+                            <li>Managing guest lists</li>
+                            <li>Creating and organizing events</li>
+                            <li>Handling RSVPs</li>
+                            <li>Providing event planning advice</li>
+                            <li>Answering your questions</li>
+                        </ul>
+                        <p class="mt-2 text-gray-800 dark:text-gray-200">
+                            How can I assist you today?
+                        </p>
+                    </div>
+                </div>
+            </div>
+        `;
+        chatMessages.appendChild(welcomeMessage);
+    });
+});
+
+// Add these functions at the global scope
+function confirmGuestImport(sessionId) {
+    fetch('/confirm-excel-import', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ session_id: sessionId })
+    })
+    .then(response => response.json())
+    .then(result => {
+        const aiResponse = document.querySelector('.message.ai-message:last-child .message-content');
+        aiResponse.innerHTML = result.message;
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        const aiResponse = document.querySelector('.message.ai-message:last-child .message-content');
+        aiResponse.innerHTML = 'Sorry, there was an error importing the guests. Please try again.';
+    });
+}
+
+function cancelGuestImport() {
+    const aiResponse = document.querySelector('.message.ai-message:last-child .message-content');
+    aiResponse.innerHTML = 'Guest import cancelled.';
+}
+
+function showUploadDialog() {
+    document.getElementById('upload-dialog').classList.remove('hidden');
+    document.getElementById('preview-container').innerHTML = '';
+    document.getElementById('file-name').textContent = '';
+    document.getElementById('excel-file').value = '';
+}
+
+function closeUploadDialog() {
+    document.getElementById('upload-dialog').classList.add('hidden');
+    currentSessionId = null;
+}
+
+function showSearchDialog() {
+    document.getElementById('search-dialog').classList.remove('hidden');
+    document.getElementById('search-input').value = '';
+    document.getElementById('search-results').innerHTML = '';
+}
+
+function closeSearchDialog() {
+    document.getElementById('search-dialog').classList.add('hidden');
+}
+
+document.getElementById('excel-file').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        document.getElementById('file-name').textContent = file.name;
+        uploadExcelFile(file);
+    }
+});
+
+function uploadExcelFile(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    fetch('/upload-excel', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            document.getElementById('preview-container').innerHTML = `
+                <div class="p-4 bg-red-50 text-red-800 rounded mb-4">
+                    <p class="font-bold">Error:</p>
+                    <p>${data.error}</p>
+                    ${data.message ? `<p>${data.message}</p>` : ''}
+                </div>
+            `;
+        } else {
+            currentSessionId = data.session_id;
+            document.getElementById('preview-container').innerHTML = data.preview;
+        }
+    })
+    .catch(error => {
+        document.getElementById('preview-container').innerHTML = `
+            <div class="p-4 bg-red-50 text-red-800 rounded mb-4">
+                <p class="font-bold">Error:</p>
+                <p>${error.message}</p>
+            </div>
+        `;
+    });
+}
+
+function handleExistingGuest(action, registrationNumber) {
+    if (!currentSessionId) return;
+
+    fetch('/handle-existing-guest', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            action: action,
+            registration_number: registrationNumber,
+            session_id: currentSessionId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert(data.error);
+        } else {
+            // Refresh the preview
+            document.getElementById(`row-${registrationNumber}`).remove();
+            alert(data.message);
+        }
+    })
+    .catch(error => {
+        alert('Error: ' + error.message);
+    });
+}
+
+function confirmImport() {
+    if (!currentSessionId) return;
+
+    fetch('/confirm-excel-import', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            session_id: currentSessionId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert(data.error);
+        } else {
+            document.getElementById('preview-container').innerHTML = `
+                <div class="p-4 bg-green-50 text-green-800 rounded mb-4">
+                    ${data.message}
+                </div>
+            `;
+            setTimeout(closeUploadDialog, 3000);
+        }
+    })
+    .catch(error => {
+        alert('Error: ' + error.message);
+    });
+}
+
+function searchGuest() {
+    const searchTerm = document.getElementById('search-input').value.trim();
+    if (!searchTerm) {
+        alert('Please enter a search term');
+        return;
+    }
+
+    fetch('/find-guest', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            search_term: searchTerm
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            document.getElementById('search-results').innerHTML = `
+                <div class="p-4 bg-red-50 text-red-800 rounded">
+                    <p>${data.error}</p>
+                </div>
+            `;
+        } else if (data.message) {
+            document.getElementById('search-results').innerHTML = `
+                <div class="p-4 bg-yellow-50 text-yellow-800 rounded">
+                    <p>${data.message}</p>
+                </div>
+            `;
+        } else {
+            document.getElementById('search-results').innerHTML = data.html;
+        }
+    })
+    .catch(error => {
+        document.getElementById('search-results').innerHTML = `
+            <div class="p-4 bg-red-50 text-red-800 rounded">
+                <p>Error: ${error.message}</p>
+            </div>
+        `;
+    });
+}
+
+function removeGuest(registrationNumber) {
+    if (!confirm('Are you sure you want to remove this guest?')) {
+        return;
+    }
+
+    fetch('/remove-guest', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            registration_number: registrationNumber
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert(data.error);
+        } else {
+            // Refresh the search results
+            searchGuest();
+            alert(data.message);
+        }
+    })
+    .catch(error => {
+        alert('Error: ' + error.message);
+    });
+}
+
+// Add event listener for Enter key in search input
+document.getElementById('search-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        searchGuest();
+    }
+});
+</script>
+
+<style>
+/* Base styles */
+#chat-messages {
+    scroll-behavior: smooth;
+    height: calc(100vh - 8rem);
+    margin-bottom: 4rem;
+}
+
+/* Message animations */
+.message {
+    transition: all 0.3s ease-out;
+}
+
+/* Table container */
+.message-content {
+    width: 100%;
+    overflow-x: auto;
+    margin: 0.5rem 0;
+    border-radius: 0.5rem;
+    background: white;
+    border: 1px solid rgba(229, 231, 235, 0.5);
+    max-width: calc(100vw - 28rem);
+}
+
+/* Table styles */
+.message-content table {
+    width: max-content;
+    min-width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.message-content table.min-w-full {
+    width: max-content;
+}
+
+/* Column minimum widths */
+.message-content th:nth-child(1),
+.message-content td:nth-child(1) { /* Event Id/Guest Id */
+    min-width: 100px;
+}
+
+.message-content th:nth-child(2),
+.message-content td:nth-child(2) { /* Name */
+    min-width: 150px;
+}
+
+.message-content th:nth-child(3),
+.message-content td:nth-child(3) { /* Date/Email */
+    min-width: 200px;
+}
+
+.message-content th:nth-child(4),
+.message-content td:nth-child(4) { /* Location */
+    min-width: 150px;
+}
+
+.message-content th:nth-child(5),
+.message-content td:nth-child(5) { /* Description */
+    min-width: 200px;
+}
+
+.message-content th:nth-child(6),
+.message-content td:nth-child(6) { /* Max Guests */
+    min-width: 120px;
+}
+
+.message-content th:nth-child(7),
+.message-content td:nth-child(7) { /* Created At */
+    min-width: 200px;
+}
+
+/* Header styles */
+.message-content thead {
+    background-color: #f9fafb;
+}
+
+.message-content th {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #4B5563;
+    background-color: inherit;
+    border-bottom: 2px solid rgba(229, 231, 235, 0.8);
+    white-space: nowrap;
+}
+
+/* Cell styles */
+.message-content td {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    color: #1F2937;
+    border-bottom: 1px solid rgba(229, 231, 235, 0.3);
+    white-space: nowrap;
+}
+
+/* Dark mode styles */
+.dark .message-content {
+    background: rgba(31, 41, 55, 1);
+    border-color: rgba(75, 85, 99, 0.5);
+}
+
+.dark .message-content thead {
+    background-color: rgba(31, 41, 55, 1);
+}
+
+.dark .message-content th {
+    color: #D1D5DB;
+    border-bottom-color: rgba(75, 85, 99, 0.5);
+}
+
+.dark .message-content td {
+    color: #F3F4F6;
+    border-bottom-color: rgba(75, 85, 99, 0.2);
+}
+
+/* Scrollbar styles */
+.message-content::-webkit-scrollbar {
+    height: 8px;
+}
+
+.message-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.message-content::-webkit-scrollbar-thumb {
+    background-color: rgba(156, 163, 175, 0.5);
+    border-radius: 4px;
+}
+
+.message-content::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(156, 163, 175, 0.7);
+}
+
+.message-content {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+}
+
+/* Typing cursor animation */
+.typing-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1.2em;
+    background-color: currentColor;
+    margin-left: 2px;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
+}
+
+/* Thinking animation */
+.thinking-dots {
+    display: flex;
+    gap: 4px;
+    padding: 4px 0;
+}
+
+.thinking-dots span {
+    width: 8px;
+    height: 8px;
+    background-color: #6366f1;
+    border-radius: 50%;
+    animation: thinking 1.4s infinite ease-in-out;
+}
+
+.thinking-dots span:nth-child(1) { animation-delay: -0.32s; }
+.thinking-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes thinking {
+    0%, 80%, 100% { 
+        transform: scale(0.4);
+        opacity: 0.3;
+    }
+    40% { 
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Fixed input area styles */
+.fixed.bottom-0 {
+    box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1), 0 -2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Ensure proper spacing for the typing indicator */
+#typing-container {
+    z-index: 20;
+}
+
+/* Message container styles */
+.message-content {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Responsive table styles */
+@media (max-width: 640px) {
+    .message-content {
+        margin: 0 -1rem;
+    }
+    
+    .message-content table {
+        font-size: 0.75rem;
+    }
+    
+    .message-content th,
+    .message-content td {
+        padding: 0.5rem;
+    }
+}
+</style>
+{% endblock %} 

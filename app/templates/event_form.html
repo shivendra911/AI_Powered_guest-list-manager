@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block page_title %}{% if event %}Edit Event{% else %}Add Event{% endif %} - Guest List Manager{% endblock %}
+
+{% block header_title %}{% if event %}Edit Event{% else %}Add Event{% endif %}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto glass-panel rounded-3xl shadow-2xl overflow-hidden transition-all duration-300 border-indigo-500/10 mb-20">
+    <div class="bg-gradient-to-r from-indigo-600 to-indigo-700 px-8 py-5">
+        <h2 class="text-xl font-black text-white flex items-center tracking-tight">
+            <i class="fas fa-calendar-plus mr-3"></i>
+            {% if event %}Edit Event{% else %}Add New Event{% endif %}
+        </h2>
+    </div>
+    
+    <div class="p-8 space-y-8 bg-zinc-50/50 dark:bg-zinc-900/30">
+        <form method="post" class="space-y-6">
+            <div class="space-y-2">
+                <label for="name" class="block text-sm font-black text-gray-500 dark:text-zinc-400 uppercase tracking-widest ml-1">Event Name</label>
+                <input type="text" name="name" id="name" value="{{ event.name if event else '' }}" required
+                    class="w-full bg-white dark:bg-zinc-900 border-2 border-gray-100 dark:border-zinc-800 rounded-2xl p-4 text-gray-800 dark:text-zinc-100 focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm transition-all font-bold"
+                    placeholder="e.g. Annual Tech Summit">
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                    <label for="date" class="block text-sm font-black text-gray-500 dark:text-zinc-400 uppercase tracking-widest ml-1">Date & Time</label>
+                    <input type="datetime-local" name="date" id="date" value="{{ event.date|format_datetime_local if event else '' }}" required
+                        class="w-full bg-white dark:bg-zinc-900 border-2 border-gray-100 dark:border-zinc-800 rounded-2xl p-4 text-gray-800 dark:text-zinc-100 focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm transition-all font-bold">
+                </div>
+                
+                <div class="space-y-2">
+                    <label for="max_guests" class="block text-sm font-black text-gray-500 dark:text-zinc-400 uppercase tracking-widest ml-1">Capacity</label>
+                    <input type="number" name="max_guests" id="max_guests" value="{{ event.max_guests if event else '' }}" required
+                        class="w-full bg-white dark:bg-zinc-900 border-2 border-gray-100 dark:border-zinc-800 rounded-2xl p-4 text-gray-800 dark:text-zinc-100 focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm transition-all font-bold"
+                        placeholder="100">
+                </div>
+            </div>
+            
+            <div class="space-y-2">
+                <label for="location" class="block text-sm font-black text-gray-500 dark:text-zinc-400 uppercase tracking-widest ml-1">Location</label>
+                <div class="relative">
+                    <i class="fas fa-map-marker-alt absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    <input type="text" name="location" id="location" value="{{ event.location if event else '' }}" required
+                        class="w-full bg-white dark:bg-zinc-900 border-2 border-gray-100 dark:border-zinc-800 rounded-2xl p-4 pl-12 text-gray-800 dark:text-zinc-100 focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm transition-all font-bold"
+                        placeholder="Grand Ballroom, Hotel Royale">
+                </div>
+            </div>
+            
+            <div class="space-y-2">
+                <label for="description" class="block text-sm font-black text-gray-500 dark:text-zinc-400 uppercase tracking-widest ml-1">Event Description</label>
+                <textarea name="description" id="description" rows="3"
+                    class="w-full bg-white dark:bg-zinc-900 border-2 border-gray-100 dark:border-zinc-800 rounded-2xl p-4 text-gray-800 dark:text-zinc-100 focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm transition-all font-bold"
+                    placeholder="Provide some details about the event...">{{ event.description if event else '' }}</textarea>
+            </div>
+            
+            <div class="flex items-center justify-between pt-4 gap-4">
+                <a href="{{ url_for('main.events') }}" 
+                   class="px-8 py-4 rounded-2xl border-2 border-gray-100 dark:border-zinc-800 font-black text-gray-500 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-all active:scale-95 text-center flex-1">
+                    Cancel
+                </a>
+                <button type="submit" 
+                        class="px-8 py-4 rounded-2xl font-black text-white bg-indigo-600 hover:bg-indigo-700 shadow-xl shadow-indigo-500/20 transition-all transform active:scale-95 flex-1">
+                    {% if event %}Update Event{% else %}Create Event{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 

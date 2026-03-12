@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+    environment:
+      - FLASK_ENV=development
+      - DATABASE_URL=sqlite:////app/database/app.db
+      # You can put your Gemini API key here or use an .env file
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - SECRET_KEY=your-super-secret-key-123
+      # Note: For Docker to talk to host's Ollama, Use host.docker.internal
+      # For Linux it's usually 172.17.0.1 or host.docker.internal depending on Docker version
+      - OLLAMA_API_URL=http://host.docker.internal:11434/api/generate
+      - OLLAMA_MODEL=llama3.2
+    depends_on:
+      - db_data_volume
+
+  # We use a dummy service just to create a volume if needed, 
+  # but for SQLite it's easier to just mount the local dir as we did in 'web'
+  db_data_volume:
+    image: busybox
+    volumes:
+      - ./database:/app/database

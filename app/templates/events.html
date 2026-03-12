@@ -1,0 +1,309 @@
+{% extends "base.html" %}
+
+{% block page_title %}Events - Guest Manager{% endblock %}
+
+{% block header_title %}Event Management{% endblock %}
+
+{% block content %}
+<div class="page-section max-w-7xl mx-auto">
+    <!-- Create Event Form -->
+    <div class="animated-card from-top mb-8">
+        <h2 class="text-xl font-semibold mb-4 section-title">Create New Event</h2>
+        <form id="create-event-form" method="POST" action="{{ url_for('main.new_event') }}"
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <input type="text" name="name" placeholder="Event Name" required
+                class="animated-input px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-500">
+            <input type="datetime-local" name="date" required
+                class="animated-input px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-500">
+            <input type="text" name="location" placeholder="Location" required
+                class="animated-input px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-500">
+            <input type="number" name="max_guests" placeholder="Maximum Guests" required
+                class="animated-input px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-500">
+            <textarea name="description" placeholder="Event Description" required
+                class="animated-input px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-500 col-span-2 h-24"></textarea>
+            <button type="submit"
+                class="animated-button bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 col-span-3">
+                Create Event
+            </button>
+        </form>
+    </div>
+
+    <!-- Event Search and Filter -->
+    <div class="flex flex-wrap gap-4 mb-8">
+        <input type="text" id="event-search" placeholder="Search events..."
+            class="animated-input flex-1 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-500">
+        <select id="event-filter"
+            class="animated-input px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-500">
+            <option value="all">All Events</option>
+            <option value="upcoming">Upcoming Events</option>
+            <option value="past">Past Events</option>
+            <option value="today">Today's Events</option>
+        </select>
+    </div>
+
+    <!-- Events List -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% set events_found = false %}
+        {% for event in events %}
+        {% if search_location and event.location.lower() == search_location.lower() %}
+        {% set events_found = true %}
+        <div class="animated-card from-bottom bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+            <div class="relative">
+                <div class="h-32 bg-gradient-to-r from-indigo-500 to-purple-600"></div>
+                <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/50 to-transparent">
+                    <h3 class="text-lg font-semibold text-white">{{ event.name }}</h3>
+                    <p class="text-sm text-gray-200">
+                        <i class="fas fa-calendar-alt mr-2"></i>{{ event.date | format_date }}
+                    </p>
+                </div>
+            </div>
+            <div class="p-4">
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                    <i class="fas fa-map-marker-alt mr-2"></i>{{ event.location }}
+                </p>
+                <p class="text-sm text-gray-700 dark:text-gray-300 mb-4">{{ event.description }}</p>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <span class="text-sm text-gray-600 dark:text-gray-400">
+                            <i class="fas fa-user-friends mr-2"></i>Max Guests: {{ event.max_guests }}
+                        </span>
+                    </div>
+                    <div class="flex space-x-2">
+                        <a href="{{ url_for('main.edit_event', event_id=event.id) }}"
+                            class="animated-button text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-200">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <form action="{{ url_for('main.delete_event', event_id=event.id) }}" method="POST"
+                            class="inline">
+                            <button type="submit"
+                                class="animated-button text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-200"
+                                onclick="return confirm('Are you sure you want to delete this event?')">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% elif not search_location %}
+        {% set events_found = true %}
+        <div class="animated-card from-bottom bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+            <div class="relative">
+                <div class="h-32 bg-gradient-to-r from-indigo-500 to-purple-600"></div>
+                <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/50 to-transparent">
+                    <h3 class="text-lg font-semibold text-white">{{ event.name }}</h3>
+                    <p class="text-sm text-gray-200">
+                        <i class="fas fa-calendar-alt mr-2"></i>{{ event.date | format_date }}
+                    </p>
+                </div>
+            </div>
+            <div class="p-4">
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                    <i class="fas fa-map-marker-alt mr-2"></i>{{ event.location }}
+                </p>
+                <p class="text-sm text-gray-700 dark:text-gray-300 mb-4">{{ event.description }}</p>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <span class="text-sm text-gray-600 dark:text-gray-400">
+                            <i class="fas fa-user-friends mr-2"></i>Max Guests: {{ event.max_guests }}
+                        </span>
+                    </div>
+                    <div class="flex space-x-2">
+                        <a href="{{ url_for('main.edit_event', event_id=event.id) }}"
+                            class="animated-button text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-200">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <form action="{{ url_for('main.delete_event', event_id=event.id) }}" method="POST"
+                            class="inline">
+                            <button type="submit"
+                                class="animated-button text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-200"
+                                onclick="return confirm('Are you sure you want to delete this event?')">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+
+        {% if not events_found %}
+        <div class="col-span-full text-center py-8">
+            {% if search_location %}
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
+                <i class="fas fa-map-marker-alt text-4xl text-gray-400 mb-4"></i>
+                <h3 class="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">No Events at {{ search_location
+                    }}</h3>
+                <p class="text-gray-500 dark:text-gray-400">There are currently no events scheduled at this location.
+                </p>
+                <a href="{{ url_for('main.events') }}"
+                    class="inline-block mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                    View All Events
+                </a>
+            </div>
+            {% else %}
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
+                <i class="fas fa-calendar-times text-4xl text-gray-400 mb-4"></i>
+                <h3 class="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">No Events Found</h3>
+                <p class="text-gray-500 dark:text-gray-400">There are currently no events scheduled.</p>
+                <a href="{{ url_for('main.new_event') }}"
+                    class="inline-block mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                    Create New Event
+                </a>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Pagination -->
+    <div class="flex justify-center mt-8">
+        <div class="flex space-x-2">
+            <button
+                class="animated-button px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                Previous
+            </button>
+            <button
+                class="animated-button px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                Next
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Event Modal -->
+<div id="edit-event-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <div class="animated-card bg-white dark:bg-gray-800 rounded-lg p-6 max-w-lg w-full mx-4">
+        <h3 class="text-lg font-semibold mb-4 section-title">Edit Event</h3>
+        <form id="edit-event-form" class="space-y-4">
+            <input type="hidden" name="event_id">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
+                <input type="text" name="title"
+                    class="animated-input w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date & Time</label>
+                <input type="datetime-local" name="date"
+                    class="animated-input w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
+                <input type="text" name="location"
+                    class="animated-input w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                <textarea name="description"
+                    class="animated-input w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-500 h-24"></textarea>
+            </div>
+            <div class="flex justify-end space-x-3">
+                <button type="button" onclick="closeEditModal()"
+                    class="animated-button px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                    Cancel
+                </button>
+                <button type="submit"
+                    class="animated-button bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700">
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Initialize animations for elements that are already visible
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        });
+
+        document.querySelectorAll('.animated-card, .animate-fade-in').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Event search functionality
+        const searchInput = document.getElementById('event-search');
+        searchInput.addEventListener('input', function () {
+            const searchTerm = this.value.toLowerCase().trim();
+            let eventsFound = false;
+
+            document.querySelectorAll('.grid > .animated-card').forEach(card => {
+                const eventName = card.querySelector('h3')?.textContent?.toLowerCase() || '';
+                const eventLocation = card.querySelector('.fa-map-marker-alt')?.parentNode?.textContent?.toLowerCase() || '';
+                const eventDescription = card.querySelector('.text-gray-700')?.textContent?.toLowerCase() || '';
+
+                const matchesSearch =
+                    eventName.includes(searchTerm) ||
+                    eventLocation.includes(searchTerm) ||
+                    eventDescription.includes(searchTerm);
+
+                if (matchesSearch) {
+                    eventsFound = true;
+                }
+                card.style.display = matchesSearch ? '' : 'none';
+            });
+
+            // Show/hide no events message
+            const noEventsMessage = document.querySelector('.col-span-full');
+            if (noEventsMessage) {
+                noEventsMessage.style.display = eventsFound ? 'none' : 'block';
+            }
+        });
+
+        // Event filter functionality
+        const filterSelect = document.getElementById('event-filter');
+        filterSelect.addEventListener('change', function () {
+            const filterValue = this.value;
+            const now = new Date();
+
+            document.querySelectorAll('.animated-card').forEach(card => {
+                const dateText = card.querySelector('.fa-calendar-alt').nextSibling.textContent;
+                const eventDate = new Date(dateText);
+
+                let show = false;
+                switch (filterValue) {
+                    case 'all':
+                        show = true;
+                        break;
+                    case 'upcoming':
+                        show = eventDate > now;
+                        break;
+                    case 'past':
+                        show = eventDate < now;
+                        break;
+                    case 'today':
+                        show = eventDate.toDateString() === now.toDateString();
+                        break;
+                }
+
+                card.style.display = show ? '' : 'none';
+            });
+        });
+    });
+
+    function editEvent(eventId) {
+        const modal = document.getElementById('edit-event-modal');
+        modal.classList.remove('hidden');
+        // Populate form with event data
+    }
+
+    function closeEditModal() {
+        const modal = document.getElementById('edit-event-modal');
+        modal.classList.add('hidden');
+    }
+
+    function deleteEvent(eventId) {
+        if (confirm('Are you sure you want to delete this event?')) {
+            // Implement delete functionality
+        }
+    }
+</script>
+{% endblock %}

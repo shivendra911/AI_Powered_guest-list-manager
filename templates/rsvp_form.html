@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block page_title %}{% if rsvp %}Edit{% else %}New{% endif %} RSVP - Guest Manager{% endblock %}
+
+{% block header_title %}{% if rsvp %}Edit{% else %}New{% endif %} RSVP{% endblock %}
+
+{% block content %}
+<div class="page-section max-w-7xl mx-auto">
+    <div class="animated-card from-top">
+        <form method="POST" class="space-y-6">
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Guest</label>
+                <select class="animated-input w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-500" 
+                        id="guest_id" 
+                        name="guest_id" 
+                        required 
+                        {% if rsvp or request.args.get('guest_id') %}disabled{% endif %}>
+                    <option value="">Select a guest</option>
+                    {% for guest in guests %}
+                    <option value="{{ guest.guest_id }}" 
+                            {% if (rsvp and rsvp.guest_id == guest.guest_id) or request.args.get('guest_id')|int == guest.guest_id %}selected{% endif %}>
+                        {{ guest.name }} ({{ guest.email }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Event</label>
+                <select class="animated-input w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-500" 
+                        id="event_id" 
+                        name="event_id" 
+                        required 
+                        {% if rsvp %}disabled{% endif %}>
+                    <option value="">Select an event</option>
+                    {% for event in events %}
+                    <option value="{{ event.event_id }}" {% if rsvp and rsvp.event_id == event.event_id %}selected{% endif %}>
+                        {{ event.name }} ({{ event.date }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="status-option attending p-4 rounded-lg text-center cursor-pointer hover:scale-105 transition-transform" onclick="selectStatus('confirmed')">
+                        <i class="fas fa-check-circle mb-2 text-2xl"></i>
+                        <div class="font-medium">Attending</div>
+                    </div>
+                    <div class="status-option not-attending p-4 rounded-lg text-center cursor-pointer hover:scale-105 transition-transform" onclick="selectStatus('declined')">
+                        <i class="fas fa-times-circle mb-2 text-2xl"></i>
+                        <div class="font-medium">Not Attending</div>
+                    </div>
+                    <div class="status-option maybe p-4 rounded-lg text-center cursor-pointer hover:scale-105 transition-transform" onclick="selectStatus('pending')">
+                        <i class="fas fa-question-circle mb-2 text-2xl"></i>
+                        <div class="font-medium">Maybe</div>
+                    </div>
+                </div>
+                <input type="hidden" id="status" name="status" value="{{ rsvp.status if rsvp else '' }}" required>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Additional Guests</label>
+                <input type="number" 
+                       class="animated-input w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-500" 
+                       id="plus_ones" 
+                       name="plus_ones" 
+                       value="{{ rsvp.plus_ones if rsvp else 0 }}" 
+                       min="0" 
+                       max="10">
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Dietary Requirements</label>
+                <textarea class="animated-input w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-500" 
+                          id="dietary_restrictions" 
+                          name="dietary_restrictions" 
+                          rows="3" 
+                          placeholder="Any dietary restrictions or preferences?">{{ rsvp.dietary_restrictions if rsvp else '' }}</textarea>
+            </div>
+
+            <div class="flex justify-end space-x-4">
+                <a href="{{ url_for('list_rsvps') }}" 
+                   class="animated-button px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                    Cancel
+                </a>
+                <button type="submit" 
+                        class="animated-button bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700">
+                    {% if rsvp %}Update{% else %}Create{% endif %} RSVP
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function selectStatus(status) {
+        document.getElementById('status').value = status;
+        document.querySelectorAll('.status-option').forEach(option => {
+            option.classList.remove('selected');
+        });
+        event.currentTarget.classList.add('selected');
+    }
+
+    // Initialize selected status if editing
+    document.addEventListener('DOMContentLoaded', function() {
+        const currentStatus = document.getElementById('status').value;
+        if (currentStatus) {
+            const statusOption = document.querySelector(`.status-option.${currentStatus}`);
+            if (statusOption) {
+                statusOption.classList.add('selected');
+            }
+        }
+    });
+</script>
+{% endblock %} 

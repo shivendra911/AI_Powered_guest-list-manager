@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block page_title %}Login - AI Guest List Manager{% endblock %}
+{% block header_title %}Login{% endblock %}
+
+{% block content %}
+<div class="page-section flex justify-center items-center min-h-[60vh]">
+    <div
+        class="animated-card bg-white dark:bg-gray-800 rounded-lg p-8 w-full max-w-md shadow-lg border border-gray-100 dark:border-gray-700">
+        <div class="text-center mb-6">
+            <h2 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
+                Welcome Back</h2>
+            <p class="text-gray-500 mt-2">Sign in to manage your events and guests</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('auth.login') }}" class="space-y-4">
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email
+                    Address</label>
+                <input type="email" id="email" name="email" required
+                    class="mt-1 block w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    placeholder="you@example.com">
+            </div>
+
+            <div>
+                <label for="password"
+                    class="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
+                <input type="password" id="password" name="password" required
+                    class="mt-1 block w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    placeholder="••••••••">
+            </div>
+
+            <div class="pt-4">
+                <button type="submit"
+                    class="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all">
+                    Sign In
+                </button>
+            </div>
+        </form>
+
+        <div class="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
+            Don't have an account?
+            <a href="{{ url_for('auth.register') }}"
+                class="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400">Sign Up</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

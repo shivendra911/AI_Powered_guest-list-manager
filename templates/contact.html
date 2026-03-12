@@ -1,0 +1,405 @@
+{% extends "base.html" %}
+
+{% block page_title %}Contact Us - Guest Manager{% endblock %}
+
+{% block header_title %}Contact Us{% endblock %}
+
+{% block extra_css %}
+<style>
+    .contact-section {
+        background: linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(129, 140, 248, 0.1) 100%);
+        border-radius: 1rem;
+        padding: 3rem;
+        margin-bottom: 3rem;
+        position: relative;
+        overflow: hidden;
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeInUp 0.6s ease-out forwards;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+
+    .float-animation {
+        animation: float 3s ease-in-out infinite;
+    }
+
+    .pulse-animation {
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    .contact-card {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+
+    .contact-card.animate-fade-in {
+        animation: fadeInLeft 0.6s ease-out forwards;
+    }
+
+    @keyframes fadeInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    [data-theme="dark"] .contact-card {
+        background: rgba(55, 65, 81, 0.8);
+    }
+
+    .contact-card:hover {
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .contact-icon {
+        width: 40px;
+        height: 40px;
+        background: var(--primary-color);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        margin-right: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .contact-icon:hover {
+        transform: rotate(15deg) scale(1.1);
+    }
+
+    .feedback-form {
+        background: white;
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        opacity: 0;
+        transform: translateX(20px);
+    }
+
+    .feedback-form.animate-fade-in {
+        animation: fadeInRight 0.6s ease-out forwards;
+    }
+
+    @keyframes fadeInRight {
+        from {
+            opacity: 0;
+            transform: translateX(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    [data-theme="dark"] .feedback-form {
+        background: #374151;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+        transform-origin: left;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        transform: scale(1.02);
+    }
+
+    [data-theme="dark"] .form-input {
+        background: #4B5563;
+        border-color: #4B5563;
+        color: white;
+    }
+
+    .submit-button {
+        background: var(--primary-color);
+        color: white;
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+        border: none;
+        font-weight: 600;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .submit-button:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+    }
+
+    .submit-button:active {
+        transform: translateY(1px);
+    }
+
+    .submit-button::after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: -100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: 0.5s;
+    }
+
+    .submit-button:hover::after {
+        left: 100%;
+    }
+
+    .map-container {
+        height: 300px;
+        border-radius: 1rem;
+        overflow: hidden;
+        margin-top: 2rem;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.5s ease;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .map-container.animate-fade-in {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .social-links {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .social-link {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--primary-color);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .social-link:hover {
+        transform: translateY(-3px) rotate(8deg);
+        background: var(--primary-dark);
+    }
+
+    .social-link::after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+        opacity: 0;
+        transition: 0.3s;
+    }
+
+    .social-link:hover::after {
+        opacity: 1;
+    }
+
+    .section-title {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 2rem;
+    }
+
+    .section-title:after {
+        content: '';
+        position: absolute;
+        width: 50%;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+        bottom: -10px;
+        left: 25%;
+        border-radius: 3px;
+        transform: scaleX(0);
+        transform-origin: center;
+        animation: expandWidth 0.6s ease-out forwards 0.3s;
+    }
+
+    @keyframes expandWidth {
+        from { transform: scaleX(0); }
+        to { transform: scaleX(1); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Contact Section -->
+    <div class="contact-section">
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-gray-800 dark:text-gray-200 mb-4">Get in Touch</h1>
+            <p class="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">Have questions about our event management services? We'd love to hear from you. Send us a message and we'll respond as soon as possible.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+            <div class="contact-card animate-fade-in delay-1">
+                <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-6">Contact Information</h3>
+                <div class="flex items-center mb-4">
+                    <div class="contact-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 dark:text-gray-400">Lovely Professional University</p>
+                        <p class="text-gray-600 dark:text-gray-400">Punjab, India</p>
+                    </div>
+                </div>
+                <div class="flex items-center mb-4">
+                    <div class="contact-icon">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-400">+91 888XXXXXXX</p>
+                </div>
+                <div class="flex items-center mb-6">
+                    <div class="contact-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-400">shivendrapratapsp3@gmail.com</p>
+                </div>
+
+                <div class="social-links">
+                    <a href="https://github.com/Shivendra09-20-06" target="_blank" class="social-link" title="GitHub">
+                        <i class="fab fa-github"></i>
+                    </a>
+                    <a href="https://www.linkedin.com/in/shivendra--pratap/" target="_blank" class="social-link" title="LinkedIn">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                    <a href="mailto:shivendrapratapsp3@gmail.com" class="social-link" title="Email">
+                        <i class="fas fa-envelope"></i>
+                    </a>
+                </div>
+
+                <!-- Map -->
+                <div class="map-container">
+                    <iframe 
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3407.4087794337187!2d75.70398731513001!3d31.255997981456518!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x391a5f5e9c489cf3%3A0x4049a5409d53c300!2sLovely%20Professional%20University!5e0!3m2!1sen!2sin!4v1645510615000!5m2!1sen!2sin"
+                        width="100%"
+                        height="100%"
+                        style="border:0;"
+                        allowfullscreen=""
+                        loading="lazy">
+                    </iframe>
+                </div>
+            </div>
+
+            <!-- Feedback Form -->
+            <div class="feedback-form animate-fade-in delay-2">
+                <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-6">Send us a Message</h3>
+                <form action="mailto:shivendrapratapsp3@gmail.com" method="post" enctype="text/plain">
+                    <div class="mb-4">
+                        <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Full Name</label>
+                        <input type="text" id="name" name="name" class="form-input" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email Address</label>
+                        <input type="email" id="email" name="email" class="form-input" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="subject" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Subject</label>
+                        <input type="text" id="subject" name="subject" class="form-input" required>
+                    </div>
+                    <div class="mb-6">
+                        <label for="message" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Message</label>
+                        <textarea id="message" name="message" rows="4" class="form-input" required></textarea>
+                    </div>
+                    <button type="submit" class="submit-button w-full">
+                        <i class="fas fa-paper-plane mr-2"></i>Send Message
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Intersection Observer for fade-in animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-fade-in');
+                }
+            });
+        }, { 
+            threshold: 0.1,
+            rootMargin: '50px'
+        });
+        
+        // Observe elements
+        document.querySelectorAll('.contact-card, .feedback-form, .map-container').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Form input animations
+        const formInputs = document.querySelectorAll('.form-input');
+        formInputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                input.style.transform = 'scale(1.02)';
+            });
+            input.addEventListener('blur', () => {
+                input.style.transform = 'scale(1)';
+            });
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    });
+</script>
+{% endblock %} 

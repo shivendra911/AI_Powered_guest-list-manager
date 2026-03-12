@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block page_title %}{% if guest %}Edit Guest{% else %}Add Guest{% endif %} - Guest List Manager{% endblock %}
+
+{% block header_title %}{% if guest %}Edit Guest{% else %}Add Guest{% endif %}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto glass-panel rounded-3xl shadow-2xl overflow-hidden transition-all duration-300 border-indigo-500/10 mb-20">
+    <div class="bg-gradient-to-r from-indigo-600 to-indigo-700 px-8 py-5">
+        <h2 class="text-xl font-black text-white flex items-center tracking-tight">
+            <i class="fas fa-user-plus mr-3"></i>
+            {% if guest %}Edit Guest{% else %}Add New Guest{% endif %}
+        </h2>
+    </div>
+    
+    <div class="p-8 space-y-8 bg-zinc-50/50 dark:bg-zinc-900/30">
+        <form method="post" class="space-y-6">
+            <div class="space-y-2">
+                <label for="name" class="block text-sm font-black text-gray-500 dark:text-zinc-400 uppercase tracking-widest ml-1">Guest Name</label>
+                <input type="text" name="name" id="name" value="{{ guest.name if guest else '' }}" required
+                    class="w-full bg-white dark:bg-zinc-900 border-2 border-gray-100 dark:border-zinc-800 rounded-2xl p-4 text-gray-800 dark:text-zinc-100 focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm transition-all font-bold"
+                    placeholder="e.g. John Doe">
+            </div>
+            
+            <div class="space-y-2">
+                <label for="email" class="block text-sm font-black text-gray-500 dark:text-zinc-400 uppercase tracking-widest ml-1">Email Address</label>
+                <div class="relative">
+                    <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    <input type="email" name="email" id="email" value="{{ guest.email if guest else '' }}" required
+                        class="w-full bg-white dark:bg-zinc-900 border-2 border-gray-100 dark:border-zinc-800 rounded-2xl p-4 pl-12 text-gray-800 dark:text-zinc-100 focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm transition-all font-bold"
+                        placeholder="john@example.com">
+                </div>
+            </div>
+            
+            <div class="space-y-2">
+                <label for="phone" class="block text-sm font-black text-gray-500 dark:text-zinc-400 uppercase tracking-widest ml-1">Phone Number</label>
+                <div class="relative">
+                    <i class="fas fa-phone absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    <input type="tel" name="phone" id="phone" value="{{ guest.phone if guest else '' }}"
+                        class="w-full bg-white dark:bg-zinc-900 border-2 border-gray-100 dark:border-zinc-800 rounded-2xl p-4 pl-12 text-gray-800 dark:text-zinc-100 focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm transition-all font-bold"
+                        placeholder="+1 (555) 000-0000">
+                </div>
+            </div>
+            
+            <div class="space-y-2">
+                <label for="notes" class="block text-sm font-black text-gray-500 dark:text-zinc-400 uppercase tracking-widest ml-1">Additional Notes</label>
+                <textarea name="notes" id="notes" rows="3"
+                    class="w-full bg-white dark:bg-zinc-900 border-2 border-gray-100 dark:border-zinc-800 rounded-2xl p-4 text-gray-800 dark:text-zinc-100 focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm transition-all font-bold"
+                    placeholder="Dietary restrictions, seating preferences, etc...">{{ guest.notes if guest else '' }}</textarea>
+            </div>
+            
+            <div class="flex items-center justify-between pt-4 gap-4">
+                <a href="{{ url_for('main.guests') }}" 
+                   class="px-8 py-4 rounded-2xl border-2 border-gray-100 dark:border-zinc-800 font-black text-gray-500 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-all active:scale-95 text-center flex-1">
+                    Cancel
+                </a>
+                <button type="submit" 
+                        class="px-8 py-4 rounded-2xl font-black text-white bg-indigo-600 hover:bg-indigo-700 shadow-xl shadow-indigo-500/20 transition-all transform active:scale-95 flex-1">
+                    {% if guest %}Update Guest{% else %}Add Guest{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 
